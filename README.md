@@ -1,5 +1,12 @@
 # receipt-extract
 
+![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=flat-square&logo=python&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-3776AB?style=flat-square)
+![Tests](https://img.shields.io/badge/Tests-67%20passing-3776AB?style=flat-square)
+![Coverage](https://img.shields.io/badge/Coverage-90%25-3776AB?style=flat-square)
+![Pydantic](https://img.shields.io/badge/Pydantic-v2-3776AB?style=flat-square)
+![SQLite](https://img.shields.io/badge/SQLite-3776AB?style=flat-square&logo=sqlite&logoColor=white)
+
 A production-shaped pipeline that turns a receipt or invoice (image / PDF) into
 **validated, structured, queryable data**. It pairs a vision LLM with strict
 schema enforcement, a deterministic Swiss QR-bill parser, and an offline
@@ -80,6 +87,36 @@ dropped to keep the stored receipt internally consistent.
 
 ---
 
+## Example
+
+A synthetic golden receipt (`data/golden/easy_1.png`) and the structured record
+the pipeline maps it to. The image below is the actual PNG shipped in the repo;
+the JSON is the real ground-truth (`data/golden/easy_1.truth.json`).
+
+<img src="docs/sample-receipt.png" alt="Sample receipt" width="320">
+
+```json
+{
+  "vendor": "Cafe Bern",
+  "date": "2026-01-15",
+  "currency": "CHF",
+  "total": "12.50",
+  "vat_rate": null,
+  "vat_amount": null,
+  "line_items": [
+    { "description": "Coffee",    "quantity": "2", "unit_price": "2.50", "amount": "5.00" },
+    { "description": "Croissant", "quantity": "1", "unit_price": "7.50", "amount": "7.50" }
+  ],
+  "payment_method": "card",
+  "confidence": null
+}
+```
+
+Every monetary value is a `Decimal` string, and the Pydantic contract enforces
+`total ≈ sum(line_items.amount)` before the record is stored.
+
+---
+
 ## Evaluation results (offline)
 
 Live evaluation needs an `ANTHROPIC_API_KEY`. To keep the project fully
@@ -90,20 +127,17 @@ date) so the numbers are honest rather than a perfect 1.0.
 
 Run it yourself: `receipt-extract eval`
 
-```
-field               prec  recall      f1    tp/fp/fn
-----------------------------------------------------
-vendor              1.00    1.00    1.00      10/0/0
-date                0.90    0.90    0.90       9/1/1
-currency            1.00    1.00    1.00      10/0/0
-total               0.90    0.90    0.90       9/1/1
-vat_rate            0.00    0.00    0.00       0/1/1
-vat_amount          0.00    0.00    0.00       0/1/1
-payment_method      1.00    1.00    1.00       7/0/0
-----------------------------------------------------
-MACRO-F1                            0.69
-receipts evaluated: 10
-```
+| Field            | Precision | Recall |   F1 | tp/fp/fn |
+|------------------|----------:|-------:|-----:|:--------:|
+| vendor           |      1.00 |   1.00 | 1.00 |  10/0/0  |
+| date             |      0.90 |   0.90 | 0.90 |   9/1/1  |
+| currency         |      1.00 |   1.00 | 1.00 |  10/0/0  |
+| total            |      0.90 |   0.90 | 0.90 |   9/1/1  |
+| vat_rate         |      0.00 |   0.00 | 0.00 |   0/1/1  |
+| vat_amount       |      0.00 |   0.00 | 0.00 |   0/1/1  |
+| payment_method   |      1.00 |   1.00 | 1.00 |   7/0/0  |
+
+**Macro-F1: 0.69** · receipts evaluated: 10
 
 VAT scores are 0 by construction: the single VAT-bearing hard receipt has an
 injected wrong rate, so with n=1 the field is either fully right or fully wrong.
