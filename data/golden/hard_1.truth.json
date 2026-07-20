@@ -1,0 +1,18 @@
+{
+  "vendor": "Restaurant Krone",
+  "date": "2026-02-20",
+  "currency": "CHF",
+  "total": "64.80",
+  "vat_rate": "8.1",
+  "vat_amount": "4.86",
+  "line_items": [
+    {
+      "description": "Menu",
+      "quantity": "2",
+      "unit_price": "32.40",
+      "amount": "64.80"
+    }
+  ],
+  "payment_method": "card",
+  "confidence": null
+}

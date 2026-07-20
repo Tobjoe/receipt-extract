@@ -1,0 +1,62 @@
+{
+  "n_receipts": 10,
+  "macro_f1": 0.6857,
+  "fields": {
+    "vendor": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 10,
+      "fp": 0,
+      "fn": 0
+    },
+    "date": {
+      "precision": 0.9,
+      "recall": 0.9,
+      "f1": 0.9,
+      "tp": 9,
+      "fp": 1,
+      "fn": 1
+    },
+    "currency": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 10,
+      "fp": 0,
+      "fn": 0
+    },
+    "total": {
+      "precision": 0.9,
+      "recall": 0.9,
+      "f1": 0.9,
+      "tp": 9,
+      "fp": 1,
+      "fn": 1
+    },
+    "vat_rate": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 1,
+      "fn": 1
+    },
+    "vat_amount": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 1,
+      "fn": 1
+    },
+    "payment_method": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 7,
+      "fp": 0,
+      "fn": 0
+    }
+  }
+}

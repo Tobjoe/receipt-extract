@@ -1,0 +1,24 @@
+{
+  "vendor": "Migros",
+  "date": "2026-02-03",
+  "currency": "CHF",
+  "total": "23.40",
+  "vat_rate": null,
+  "vat_amount": null,
+  "line_items": [
+    {
+      "description": "Milk",
+      "quantity": "2",
+      "unit_price": "1.70",
+      "amount": "3.40"
+    },
+    {
+      "description": "Bread",
+      "quantity": "4",
+      "unit_price": "5.00",
+      "amount": "20.00"
+    }
+  ],
+  "payment_method": "cash",
+  "confidence": null
+}

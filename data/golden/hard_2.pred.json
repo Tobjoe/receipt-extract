@@ -1,0 +1,24 @@
+{
+  "vendor": "Coop Pronto",
+  "date": "2026-03-18",
+  "currency": "CHF",
+  "total": "12.60",
+  "vat_rate": null,
+  "vat_amount": null,
+  "line_items": [
+    {
+      "description": "Sandwich",
+      "quantity": "1",
+      "unit_price": "6.60",
+      "amount": "6.60"
+    },
+    {
+      "description": "Juice",
+      "quantity": "2",
+      "unit_price": "3.00",
+      "amount": "6.00"
+    }
+  ],
+  "payment_method": "cash",
+  "confidence": null
+}

@@ -1,0 +1,24 @@
+{
+  "vendor": "Cafe Bern",
+  "date": "2026-01-15",
+  "currency": "CHF",
+  "total": "12.50",
+  "vat_rate": null,
+  "vat_amount": null,
+  "line_items": [
+    {
+      "description": "Coffee",
+      "quantity": "2",
+      "unit_price": "2.50",
+      "amount": "5.00"
+    },
+    {
+      "description": "Croissant",
+      "quantity": "1",
+      "unit_price": "7.50",
+      "amount": "7.50"
+    }
+  ],
+  "payment_method": "card",
+  "confidence": null
+}

@@ -1,0 +1,18 @@
+{
+  "vendor": "Denner",
+  "date": "2026-01-22",
+  "currency": "CHF",
+  "total": "9.90",
+  "vat_rate": null,
+  "vat_amount": null,
+  "line_items": [
+    {
+      "description": "Wine",
+      "quantity": "1",
+      "unit_price": "9.90",
+      "amount": "9.90"
+    }
+  ],
+  "payment_method": "card",
+  "confidence": null
+}

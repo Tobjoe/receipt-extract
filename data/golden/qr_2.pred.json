@@ -1,0 +1,18 @@
+{
+  "vendor": "Sanitaer GmbH",
+  "date": "2026-02-05",
+  "currency": "CHF",
+  "total": "480.00",
+  "vat_rate": null,
+  "vat_amount": null,
+  "line_items": [
+    {
+      "description": "Repair",
+      "quantity": "1",
+      "unit_price": "480.00",
+      "amount": "480.00"
+    }
+  ],
+  "payment_method": null,
+  "confidence": null
+}

@@ -1,0 +1,18 @@
+{
+  "vendor": "Starbucks",
+  "date": "2026-02-14",
+  "currency": "EUR",
+  "total": "8.80",
+  "vat_rate": null,
+  "vat_amount": null,
+  "line_items": [
+    {
+      "description": "Latte",
+      "quantity": "2",
+      "unit_price": "4.40",
+      "amount": "8.80"
+    }
+  ],
+  "payment_method": "card",
+  "confidence": null
+}

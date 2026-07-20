@@ -1,0 +1,18 @@
+{
+  "vendor": "SBB",
+  "date": "2026-03-10",
+  "currency": "CHF",
+  "total": "75.00",
+  "vat_rate": null,
+  "vat_amount": null,
+  "line_items": [
+    {
+      "description": "Ticket ZH-BE",
+      "quantity": "1",
+      "unit_price": "75.00",
+      "amount": "75.00"
+    }
+  ],
+  "payment_method": "card",
+  "confidence": null
+}

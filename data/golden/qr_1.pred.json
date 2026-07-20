@@ -1,0 +1,18 @@
+{
+  "vendor": "Elektro AG",
+  "date": "2026-01-30",
+  "currency": "CHF",
+  "total": "250.00",
+  "vat_rate": null,
+  "vat_amount": null,
+  "line_items": [
+    {
+      "description": "Installation",
+      "quantity": "1",
+      "unit_price": "250.00",
+      "amount": "250.00"
+    }
+  ],
+  "payment_method": null,
+  "confidence": null
+}
