@@ -182,18 +182,38 @@ Ingestion is idempotent: re-running on the same file returns the cached receipt
 
 ### Web UI (optional)
 
-A small Gradio UI wraps the same pipeline. It runs even without a key: the
-*Offline demo* and *Evaluation* tabs work fully against the golden dataset and
-make zero API calls; the *Extract (live)* tab activates when `ANTHROPIC_API_KEY`
-is set.
+A small Gradio UI wraps the same pipeline, with three tabs:
+
+- **Extract (live)** — upload an image / PDF and run a real extraction. Paste an
+  Anthropic API key directly in the UI (used per-request, never logged or
+  stored) or leave the field blank to use the `ANTHROPIC_API_KEY` environment
+  variable.
+- **Offline demo** — browse the golden dataset: recorded prediction vs. ground
+  truth, field by field. Zero API calls.
+- **Evaluation** — score every golden receipt (precision / recall / F1).
+
+The offline tabs auto-load on open, so the UI is useful the moment it starts —
+no key required.
 
 ```bash
 .venv/bin/pip install -r requirements-ui.txt   # or: pip install -e ".[ui]"
 .venv/bin/receipt-extract-ui                   # opens http://127.0.0.1:7860
 ```
 
+Every UI action is also reachable through Gradio's auto-generated API (the
+*Use via API* button in the footer), e.g. via `gradio_client`:
+
+```python
+from gradio_client import Client
+Client("http://127.0.0.1:7860").predict(api_name="/run_eval")
+```
+
 The UI's pure render/diff helpers live in `webui/render.py` (Gradio-free, unit
 tested in `tests/test_webui.py`); the Gradio wiring is isolated in `webui/app.py`.
+
+> **Note:** the in-UI key field is meant for local use. Do not expose this UI
+> publicly (`share=True` / a deploy) and have people paste real keys without
+> HTTPS and auth in front of it.
 
 ---
 
