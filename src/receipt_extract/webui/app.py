@@ -36,15 +36,20 @@ def _has_key() -> bool:
     return bool(os.environ.get("ANTHROPIC_API_KEY"))
 
 
-def extract_live(file_path: str | None, model: str):
-    """Run a real vision extraction on an uploaded image/PDF."""
+def extract_live(file_path: str | None, model: str, api_key: str | None):
+    """Run a real vision extraction on an uploaded image/PDF.
+
+    The key comes from the UI field if the user pasted one, else from the
+    ``ANTHROPIC_API_KEY`` environment variable. It is never logged or persisted.
+    """
+    key = (api_key or "").strip() or os.environ.get("ANTHROPIC_API_KEY", "")
     if not file_path:
         return "Upload an image or PDF first.", [], {}
-    if not _has_key():
+    if not key:
         return (
-            "**No `ANTHROPIC_API_KEY` set.** Live extraction is disabled — "
-            "use the *Offline demo* tab to explore recorded results with zero "
-            "API calls.",
+            "**No API key.** Paste your `ANTHROPIC_API_KEY` in the field on the "
+            "left, or explore the *Offline demo* / *Evaluation* tabs — they need "
+            "no key.",
             [],
             {},
         )
@@ -54,13 +59,16 @@ def extract_live(file_path: str | None, model: str):
     from receipt_extract.extraction import ExtractionFailed, ReceiptExtractor
 
     extractor = ReceiptExtractor(
-        client=anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"]),
+        client=anthropic.Anthropic(api_key=key),
         model=model,
     )
     try:
         result = extractor.extract(Path(file_path))
     except (ExtractionFailed, ValueError, FileNotFoundError) as exc:
         return f"**Extraction failed:** {exc}", [], {}
+    except anthropic.APIError as exc:
+        # Bad key, rate limit, network — surface it without leaking a traceback.
+        return f"**API error:** {exc}", [], {}
 
     data = result.receipt.model_dump(mode="json")
     run = result.run
@@ -98,9 +106,9 @@ def build_app() -> gr.Blocks:
         "> 🟢 **Live extraction is on** — `ANTHROPIC_API_KEY` detected. "
         "Upload a receipt in the first tab."
         if has_key
-        else "> ⚪ **No API key set.** The *Extract* tab is disabled, but "
-        "**Offline demo** and **Evaluation** below work fully with zero API "
-        "calls — start there."
+        else "> ⚪ **No API key in the environment.** Paste one in the *Extract* "
+        "tab to run live, or use **Offline demo** / **Evaluation** — they need "
+        "no key at all."
     )
 
     with gr.Blocks(
@@ -129,22 +137,29 @@ def build_app() -> gr.Blocks:
                         file_types=["image", ".pdf"],
                         type="filepath",
                     )
+                    key_in = gr.Textbox(
+                        label="Anthropic API key",
+                        type="password",
+                        placeholder="sk-ant-…",
+                        value="",
+                        info=(
+                            "Used only for this request — never logged or stored. "
+                            "Leave blank to use the ANTHROPIC_API_KEY environment "
+                            "variable."
+                            + ("  ✓ found in environment" if has_key else "")
+                        ),
+                    )
                     model_in = gr.Textbox(
                         label="Model", value=DEFAULT_MODEL,
                         info="Anthropic model id used for extraction",
                     )
                     with gr.Row():
-                        extract_btn = gr.Button(
-                            "Extract receipt", variant="primary",
-                            interactive=has_key,
-                        )
+                        extract_btn = gr.Button("Extract receipt", variant="primary")
                         clear_btn = gr.ClearButton(value="Clear")
                 with gr.Column(scale=1):
                     live_summary = gr.Markdown(
-                        "*Extracted fields appear here.*"
-                        if has_key
-                        else "*Set `ANTHROPIC_API_KEY` and restart to enable "
-                        "live extraction. Meanwhile, try the other tabs.*"
+                        "*Upload a receipt, add your key if needed, then "
+                        "**Extract**. Results appear here.*"
                     )
                     live_items = gr.Dataframe(
                         headers=_LINE_ITEM_HEADERS, label="Line items",
@@ -153,9 +168,10 @@ def build_app() -> gr.Blocks:
                     live_json = gr.JSON(label="Validated receipt")
             extract_btn.click(
                 extract_live,
-                inputs=[file_in, model_in],
+                inputs=[file_in, model_in, key_in],
                 outputs=[live_summary, live_items, live_json],
             )
+            # Clear the file and outputs but keep the key field intact.
             clear_btn.add([file_in, live_summary, live_items, live_json])
 
         with gr.Tab("② Offline demo"):
