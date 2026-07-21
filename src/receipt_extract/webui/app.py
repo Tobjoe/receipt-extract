@@ -93,33 +93,62 @@ def run_eval():
 
 def build_app() -> gr.Blocks:
     stems = list_golden_stems(GOLDEN_DIR)
-    key_banner = (
-        "🟢 `ANTHROPIC_API_KEY` detected — live extraction enabled."
-        if _has_key()
-        else "⚪ No API key — live tab is a stub; offline tabs work fully."
+    has_key = _has_key()
+    banner = (
+        "> 🟢 **Live extraction is on** — `ANTHROPIC_API_KEY` detected. "
+        "Upload a receipt in the first tab."
+        if has_key
+        else "> ⚪ **No API key set.** The *Extract* tab is disabled, but "
+        "**Offline demo** and **Evaluation** below work fully with zero API "
+        "calls — start there."
     )
 
-    with gr.Blocks(title="receipt-extract", theme=gr.themes.Soft()) as app:
+    with gr.Blocks(
+        title="receipt-extract",
+        theme=gr.themes.Soft(primary_hue="emerald", neutral_hue="slate"),
+        css=".gradio-container {max-width: 1040px !important; margin: 0 auto;}",
+    ) as app:
         gr.Markdown(
             "# 🧾 receipt-extract\n"
-            "Image / PDF → vision LLM (tool-use) → **schema-validated** data. "
-            f"\n\n{key_banner}"
+            "Turn a **receipt or invoice** (image / PDF) into "
+            "**schema-validated, queryable data** — vision LLM + strict Pydantic "
+            "checks + an honest evaluation harness.\n\n"
+            f"{banner}"
         )
 
-        with gr.Tab("Extract (live)"):
+        with gr.Tab("① Extract (live)"):
+            gr.Markdown(
+                "Upload one receipt and run a **real** extraction. "
+                "This calls the Anthropic API (costs a few cents per receipt) "
+                "and needs `ANTHROPIC_API_KEY`."
+            )
             with gr.Row():
-                with gr.Column():
+                with gr.Column(scale=1):
                     file_in = gr.File(
                         label="Receipt image or PDF",
                         file_types=["image", ".pdf"],
                         type="filepath",
                     )
-                    model_in = gr.Textbox(label="Model", value=DEFAULT_MODEL)
-                    extract_btn = gr.Button("Extract", variant="primary")
-                with gr.Column():
-                    live_summary = gr.Markdown()
+                    model_in = gr.Textbox(
+                        label="Model", value=DEFAULT_MODEL,
+                        info="Anthropic model id used for extraction",
+                    )
+                    with gr.Row():
+                        extract_btn = gr.Button(
+                            "Extract receipt", variant="primary",
+                            interactive=has_key,
+                        )
+                        clear_btn = gr.ClearButton(value="Clear")
+                with gr.Column(scale=1):
+                    live_summary = gr.Markdown(
+                        "*Extracted fields appear here.*"
+                        if has_key
+                        else "*Set `ANTHROPIC_API_KEY` and restart to enable "
+                        "live extraction. Meanwhile, try the other tabs.*"
+                    )
                     live_items = gr.Dataframe(
-                        headers=_LINE_ITEM_HEADERS, label="Line items", wrap=True
+                        headers=_LINE_ITEM_HEADERS, label="Line items",
+                        wrap=True, row_count=(1, "dynamic"),
                     )
                     live_json = gr.JSON(label="Validated receipt")
             extract_btn.click(
@@ -127,22 +156,29 @@ def build_app() -> gr.Blocks:
                 inputs=[file_in, model_in],
                 outputs=[live_summary, live_items, live_json],
             )
+            clear_btn.add([file_in, live_summary, live_items, live_json])
 
-        with gr.Tab("Offline demo"):
+        with gr.Tab("② Offline demo"):
             gr.Markdown(
-                "Explore the golden dataset — recorded predictions checked "
-                "against ground truth, field by field. Zero API calls."
+                f"Explore the **{len(stems)} golden receipts** shipped with the "
+                "repo — a recorded model prediction checked against "
+                "hand-labelled ground truth, field by field. **Zero API "
+                "calls.** ✓ = match, ✗ = mismatch."
             )
             sample_in = gr.Dropdown(
-                choices=stems, value=stems[0] if stems else None, label="Golden sample"
+                choices=stems, value=stems[0] if stems else None,
+                label="Golden sample",
+                info="easy_* = clean receipts · hard_* = tricky · qr_* = Swiss QR-bill",
             )
             sample_header = gr.Markdown()
             with gr.Row():
                 sample_items = gr.Dataframe(
-                    headers=_LINE_ITEM_HEADERS, label="Predicted line items", wrap=True
+                    headers=_LINE_ITEM_HEADERS, label="Predicted line items",
+                    wrap=True,
                 )
                 sample_diff = gr.Dataframe(
-                    headers=_DIFF_HEADERS, label="Field-by-field diff", wrap=True
+                    headers=_DIFF_HEADERS, label="Prediction vs. ground truth",
+                    wrap=True,
                 )
             sample_in.change(
                 load_offline_sample,
@@ -150,20 +186,31 @@ def build_app() -> gr.Blocks:
                 outputs=[sample_header, sample_items, sample_diff],
             )
 
-        with gr.Tab("Evaluation"):
+        with gr.Tab("③ Evaluation"):
             gr.Markdown(
-                "Run the offline harness over every golden receipt and score "
-                "each field (precision / recall / F1)."
+                "Score **every** golden receipt at once — per-field precision / "
+                "recall / F1, plus the macro-average. This is what makes changes "
+                "measurable instead of guesswork. Runs offline."
             )
-            eval_btn = gr.Button("Run evaluation", variant="primary")
+            eval_btn = gr.Button("Re-run evaluation", variant="primary")
             eval_out = gr.Markdown()
             eval_btn.click(run_eval, outputs=eval_out)
+
+        # Populate the offline tabs on load so a keyless visitor sees real
+        # results immediately, without hunting for a button to press.
+        if stems:
+            app.load(
+                load_offline_sample,
+                inputs=sample_in,
+                outputs=[sample_header, sample_items, sample_diff],
+            )
+        app.load(run_eval, outputs=eval_out)
 
     return app
 
 
 def main() -> None:
-    build_app().launch()
+    build_app().launch(inbrowser=True)
 
 
 if __name__ == "__main__":
