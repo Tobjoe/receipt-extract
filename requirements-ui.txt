@@ -1,2 +1,7 @@
--r requirements.txt
+# UI deps. Gradio caps Pillow <12, so this file loosens the Pillow pin from
+# requirements.txt (12.3.0) rather than re-including it, to stay installable.
+pydantic==2.13.4
+anthropic==0.117.0
+pypdfium2==5.12.1
+Pillow>=11,<12
 gradio>=4,<6
