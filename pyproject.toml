@@ -15,8 +15,12 @@ dependencies = [
     "Pillow>=10.0",
 ]
 
+[project.optional-dependencies]
+ui = ["gradio>=4,<6"]
+
 [project.scripts]
 receipt-extract = "receipt_extract.cli:main"
+receipt-extract-ui = "receipt_extract.webui.app:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

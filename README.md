@@ -180,6 +180,21 @@ $ receipt-extract ingest data/golden/qr_1.png --db receipts.db
 Ingestion is idempotent: re-running on the same file returns the cached receipt
 (keyed by SHA-256 of the file contents) instead of re-calling the API.
 
+### Web UI (optional)
+
+A small Gradio UI wraps the same pipeline. It runs even without a key: the
+*Offline demo* and *Evaluation* tabs work fully against the golden dataset and
+make zero API calls; the *Extract (live)* tab activates when `ANTHROPIC_API_KEY`
+is set.
+
+```bash
+.venv/bin/pip install -r requirements-ui.txt   # or: pip install -e ".[ui]"
+.venv/bin/receipt-extract-ui                   # opens http://127.0.0.1:7860
+```
+
+The UI's pure render/diff helpers live in `webui/render.py` (Gradio-free, unit
+tested in `tests/test_webui.py`); the Gradio wiring is isolated in `webui/app.py`.
+
 ---
 
 ## Project layout
@@ -193,6 +208,7 @@ src/receipt_extract/
   eval/         golden data generator + precision/recall/F1 harness
   pipeline.py   detect QR -> extract -> merge -> store (idempotent)
   cli.py        `receipt-extract ingest|eval`
+  webui/        optional Gradio UI (render.py = pure helpers, app.py = wiring)
 data/golden/    10 synthetic receipts (PNG + truth + recorded prediction)
 tests/          unit + integration tests
 ```
