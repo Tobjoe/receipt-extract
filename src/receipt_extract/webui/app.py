@@ -31,6 +31,49 @@ GOLDEN_DIR = Path("data/golden")
 _LINE_ITEM_HEADERS = ["description", "quantity", "unit_price", "amount"]
 _DIFF_HEADERS = ["field", "predicted", "ground truth", "match"]
 
+# Centre the app, and render the three native footer links (Use via API /
+# Built with Gradio / Settings) as real buttons instead of tiny grey text —
+# their original behaviour (API drawer, link, settings modal) is preserved.
+_CSS = """
+.gradio-container { max-width: 1040px !important; margin: 0 auto; }
+
+footer {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    padding: 1rem 0 1.5rem;
+}
+footer .divider { display: none !important; }
+footer .show-api,
+footer a.built-with,
+footer .settings {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--button-secondary-border-color, var(--border-color-primary));
+    border-radius: 8px;
+    background: var(--button-secondary-background-fill);
+    color: var(--button-secondary-text-color) !important;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-decoration: none !important;
+    cursor: pointer;
+    transition: filter 0.15s ease, transform 0.05s ease;
+}
+footer .show-api:hover,
+footer a.built-with:hover,
+footer .settings:hover { filter: brightness(1.08); }
+footer .show-api:active,
+footer a.built-with:active,
+footer .settings:active { transform: translateY(1px); }
+footer .show-api img,
+footer a.built-with img,
+footer .settings img { width: 16px; height: 16px; }
+"""
+
 
 def _has_key() -> bool:
     return bool(os.environ.get("ANTHROPIC_API_KEY"))
@@ -114,7 +157,7 @@ def build_app() -> gr.Blocks:
     with gr.Blocks(
         title="receipt-extract",
         theme=gr.themes.Soft(primary_hue="emerald", neutral_hue="slate"),
-        css=".gradio-container {max-width: 1040px !important; margin: 0 auto;}",
+        css=_CSS,
     ) as app:
         gr.Markdown(
             "# 🧾 receipt-extract\n"
